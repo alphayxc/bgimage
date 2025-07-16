@@ -53,16 +53,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.issue.number,
-                body: `🚫 **Unauthorized Issue Creation**
-
-This repository only allows administrators to create new Issues.
-
-**How to participate:**
-- 💬 Comment on existing Issues for discussion
-- 👍 Like content you find interesting
-- 🍴 Fork the repository for your own development
-
-This Issue will be automatically closed and locked.`
+                body: '🚫 **Unauthorized Issue Creation**\n\nThis repository only allows administrators to create new Issues.\n\n**How to participate:**\n- 💬 Comment on existing Issues for discussion\n- 👍 Like content you find interesting\n- 🍴 Fork the repository for your own development\n\nThis Issue will be automatically closed and locked.'
               });
 
               console.log('Unauthorized issue has been closed and locked.');
