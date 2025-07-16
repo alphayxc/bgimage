@@ -1,0 +1,68 @@
+name: Manage Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  check-issue-creator:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if issue creator is authorized
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // 定义授权用户列表（包括仓库所有者）
+            const authorizedUsers = [
+              context.repo.owner, // 仓库所有者
+              // 在这里添加其他授权用户的 GitHub 用户名
+              // 'username1',
+              // 'username2',
+            ];
+
+            const issueCreator = context.payload.issue.user.login;
+            const isAuthorized = authorizedUsers.includes(issueCreator);
+
+            console.log(`Issue creator: ${issueCreator}`);
+            console.log(`Authorized users: ${authorizedUsers.join(', ')}`);
+            console.log(`Is authorized: ${isAuthorized}`);
+
+            if (!isAuthorized) {
+              // 立即关闭并锁定 issue，防止进一步操作
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                state: 'closed'
+              });
+
+              // 锁定 issue，防止评论
+              await github.rest.issues.lock({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                lock_reason: 'off-topic'
+              });
+
+              // 添加说明评论
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: `� **未授权的 Issue 创建**
+
+此仓库仅允许管理员创建新的 Issues。
+
+**如何参与：**
+- 💬 在现有 Issues 下评论讨论
+- 👍 为感兴趣的内容点赞
+- ⭐ Star 本仓库获取更新
+
+---
+*此 Issue 已被自动关闭并锁定。*`
+              });
+
+              console.log('Unauthorized issue has been closed and locked.');
+            } else {
+              console.log('Issue creator is authorized. No action needed.');
+            }
